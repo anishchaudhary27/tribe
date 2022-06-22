@@ -8,4 +8,5 @@ const key = {
   measurementId: "G-8BVQV5HKKQ",
 };
 
+
 export default key;

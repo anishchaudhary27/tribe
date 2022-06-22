@@ -1,9 +1,11 @@
 import { Button } from "@chakra-ui/react";
+import { Route, Routes } from "react-router-dom";
+import Landing from "./pages/landing";
 
 export default function App() {
   return (
-    <div>
-      <Button className="m-2" variant={'solid'}>Hello</Button>
-    </div>
+    <Routes>
+      <Route index element={<Landing/>}/>
+    </Routes>
   )
 }
