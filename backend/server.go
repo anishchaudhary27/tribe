@@ -46,8 +46,8 @@ func main() {
 	api.Use(middleware.AuthMiddleware(ctx, auth))
 
 	userGroup := api.Group("/user")
-
-	userGroup.Get("", user.HandleGetUser(ctx, auth, firestore))
+	userGroup.Get("", user.HandleGetUser(ctx, firestore))
+	userGroup.Post("/create", user.HandleCreateUser(ctx, firestore))
 
 	app.Listen(":8080")
 }

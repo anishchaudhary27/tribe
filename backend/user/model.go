@@ -1,10 +1,9 @@
 package user
 
 type User struct {
-	Name        string
-	UserHandle  string
-	DisplayName string
-	PhotoURL    string
-	About       string
-	Country     string
+	Name     string `firestore:"name"`
+	Handle   string `firestore:"handle"`
+	PhotoURL string `firestore:"photoURL"`
+	About    string `firestore:"about"`
+	Country  string `firestore:"country"`
 }

@@ -2,30 +2,20 @@ import { auth } from "../../firebase";
 import {
   GoogleAuthProvider,
   signOut,
-  User,
   signInWithRedirect,
-  onAuthStateChanged,
 } from "firebase/auth";
 import { Button, Heading, Spinner, useToast } from "@chakra-ui/react";
 import { FaGoogle, FiLogOut } from "react-icons/all";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useQuery } from "react-query";
+import {tokenQueryId,getToken} from "../../queries/token"
+import { useEffect } from "react";
 
 export default function Login() {
-  const [user, setUser] = useState<null | User>();
-  const [loading, setLoading] = useState(true);
   const toast = useToast();
   const redirect = new URLSearchParams(window.location.search).get("redirect");
-  useEffect(() => {
-    document.title = "Login";
-    const unSubAuth = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-    return unSubAuth;
-  }, []);
+  const {isLoading: isLoadingToken, error: tokenError, data: token} = useQuery(tokenQueryId, getToken)
   const handleLogin = () => {
-    setLoading(true);
     signInWithRedirect(auth, new GoogleAuthProvider())
       .catch((err) => {
         console.error(err);
@@ -37,16 +27,18 @@ export default function Login() {
           duration: 5000,
         });
       })
-      .finally(() => setLoading(false));
   };
+  useEffect(() => {
+    document.title = "login"
+  },[])
   return (
     <div className=" flex justify-center w-full p-4">
-      {!loading && user && (
+      {!isLoadingToken && token && (
         <div className="mt-20 rounded-sm h-60 w-80 py-8 px-8 shadow flex flex-col items-center">
-          <Heading color={"gray.700"}>LogIn</Heading>
+          <Heading>LogIn</Heading>
           <Link className="w-full" to={redirect ? redirect : "/home"}>
-            <Button width={"full"} leftIcon={<FaGoogle />} className="mt-8">
-              Continue as {user.displayName?.split(" ")[0]}
+            <Button color="#0C8F8F" width={"full"} leftIcon={<FaGoogle />} className="mt-8">
+              continue as {token.claims.name?.toString()?.split(" ")[0]}
             </Button>
           </Link>
           <Button
@@ -54,25 +46,27 @@ export default function Login() {
             leftIcon={<FiLogOut />}
             className="mt-4"
             onClick={() => signOut(auth)}
+            color="#0C8F8F"
           >
-            LogOut
+            logout
           </Button>
         </div>
       )}
-      {!loading && !user && (
+      {!isLoadingToken && !token && (
         <div className="mt-20 rounded-sm h-60 w-80 py-8 px-8 shadow flex flex-col items-center">
-          <Heading color={"gray.700"}>LogIn</Heading>
+          <Heading>LogIn</Heading>
           <Button
             width={"full"}
             leftIcon={<FaGoogle />}
             className="mt-16"
             onClick={handleLogin}
+            color="#0C8F8F"
           >
-            LogIn with Google
+            logn with Google
           </Button>
         </div>
       )}
-      {loading && <Spinner className="mt-20" />}
+      {isLoadingToken && <Spinner className="mt-20" />}
     </div>
   );
 }

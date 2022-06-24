@@ -11,7 +11,6 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalCloseButton,
   ModalFooter,
   Button,
   FormControl,
@@ -19,8 +18,9 @@ import {
   ModalBody,
   Input,
   FormHelperText,
+  useToast
 } from "@chakra-ui/react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import {
   AiOutlineMessage,
   FiSearch,
@@ -31,36 +31,77 @@ import {
   CgProfile,
   MdPayment,
   FiLogIn,
+  GrRefresh
 } from "react-icons/all";
-import Logo from "../../logo.png";
+import Logo from "../../logo.svg";
 import Avatar from "boring-avatars";
 import { auth } from "../../firebase";
 import { useEffect, useRef, useState } from "react";
-import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { signOut } from "firebase/auth";
+import { tokenQueryId, getToken } from "../../queries/token";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { readUserQuery, userQueryId, createUserQuery } from "../../queries/user";
 
 export default function Main() {
-  const [user, setUser] = useState<null | User>();
-  const [loading, setLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [userHandleInput, setUserHandleInput] = useState("");
+  const toast = useToast()
+  const [userSignUpInput, setUserSignUpInput] = useState({
+    name: "",
+    handle: "",
+  });
   const userHandleInputRef = useRef(null);
-  const userHandleInputError = !userHandleInput.match(/^[a-z1-9_]+$/);
-  const navigate = useNavigate();
-  useEffect(() => {
-    const unSubAuth = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-      if (!user)
-        navigate(
-          "/login?redirect=" +
-            (window.location.pathname.slice(0, 6) !== "/login")
-            ? window.location.pathname
-            : ""
-        );
-    });
-    return unSubAuth;
-  }, []);
-  useEffect(() => {}, [user]);
+  const userHandleInputError = !userSignUpInput.handle.match(/^[a-z1-9_]+$/);
+  const userNameInputError = !userSignUpInput.name.match(/^[a-zA-Z ]+$/);
+  const queryClient = useQueryClient()
+  const {
+    isLoading: isLoadingToken,
+    error: tokenError,
+    data: token,
+  } = useQuery(tokenQueryId, getToken);
+  const {
+    isLoading: isLoadingUser,
+    error: errorUser,
+    data: user,
+  } = useQuery(userQueryId, readUserQuery(token!), {
+    enabled: !!token?.authTime,
+  });
+  const createUserMutation = useMutation("user",createUserQuery,{
+    onSuccess: (newUser) => {
+      queryClient.setQueriesData(userQueryId, newUser)
+    },
+    onError: (error) => {
+      console.error(error)
+      toast({
+        title: "error creating user",
+        status: "error",
+        duration: 5000,
+        isClosable: true
+      })
+    },
+    onSettled: () => {
+      onClose()
+    }
+  })
+  const handleCreateUser = () => {
+    if(!userHandleInputError && !userHandleInputError && createUserMutation.isIdle) {
+      createUserMutation.mutate({handle: userSignUpInput.handle, name: userSignUpInput.name, token: token?.token})
+    }
+    else {
+      toast({
+        title: "invalid input",
+        status: "error",
+        duration: 5000,
+        isClosable: true
+      })
+    }
+  }
+  useEffect(()=>{
+    if(user) {
+      if(user.status==404) {
+        onOpen()
+      }
+    }
+  },[user])
   return (
     <div>
       <Outlet />
@@ -69,9 +110,18 @@ export default function Main() {
           border-gray-200 flex justify-between items-center p-4"
       >
         <Link to={"/home"}>
-          <img src={Logo} className="h-8" />
+          <img src={Logo} className="h-12" />
         </Link>
         <Stack isInline>
+          <Tooltip label="refresh" fontSize={"md"}>
+            <IconButton
+              variant={"ghost"}
+              aria-label="messages"
+              size="lg"
+              isRound
+              icon={<GrRefresh />}
+            />
+          </Tooltip>
           <Tooltip label="search" fontSize={"md"}>
             <Link to="/search">
               <IconButton
@@ -83,7 +133,7 @@ export default function Main() {
               />
             </Link>
           </Tooltip>
-          {!loading && user && (
+          {!isLoadingToken && token && (
             <Tooltip label="messages" fontSize={"md"}>
               <Link to="/messages">
                 <IconButton
@@ -101,8 +151,12 @@ export default function Main() {
               <Avatar
                 size={40}
                 variant="beam"
-                name={user ? user.uid : "Elizabeth Peratrovich"}
-                colors={["#07F9A2", "#09C184", "#0A8967", "#0C5149", "#0D192B"]}
+                name={
+                  token && token.claims["name"]
+                    ? `john snow${token.claims.name?.toString()}`
+                    : "Elizabeth Peratrovich"
+                }
+                colors={["#FFAD08", "#EDD75A", "#73B06F", "#0C8F8F", "#405059"]}
               />
             </MenuButton>
             <MenuList>
@@ -112,7 +166,7 @@ export default function Main() {
                   <span>Home</span>
                 </MenuItem>
               </Link>
-              {!loading && user && (
+              {!isLoadingToken && token && (
                 <Link to="/profile">
                   <MenuItem>
                     <CgProfile className="mr-2" />
@@ -120,7 +174,7 @@ export default function Main() {
                   </MenuItem>
                 </Link>
               )}
-              {!loading && user && (
+              {!isLoadingToken && token && (
                 <Link to="/settings">
                   <MenuItem>
                     <MdManageAccounts className="mr-2" />
@@ -128,7 +182,7 @@ export default function Main() {
                   </MenuItem>
                 </Link>
               )}
-              {!loading && user && (
+              {!isLoadingToken && token && (
                 <Link to="/subscriptions">
                   <MenuItem>
                     <MdPayment className="mr-2" />
@@ -136,13 +190,13 @@ export default function Main() {
                   </MenuItem>
                 </Link>
               )}
-              {!loading && user && (
+              {!isLoadingToken && token && (
                 <MenuItem onClick={() => signOut(auth)}>
                   <FiLogOut className="mr-2" />
                   <span>LogOut</span>
                 </MenuItem>
               )}
-              {!loading && !user && (
+              {!isLoadingToken && token && (
                 <Link to="/login">
                   <MenuItem>
                     <FiLogIn className="mr-2" />
@@ -164,13 +218,12 @@ export default function Main() {
       </div>
       <Modal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={() => {}}
         initialFocusRef={userHandleInputRef}
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Select user handle</ModalHeader>
-          <ModalCloseButton />
+          <ModalHeader>Welcome🥳!!</ModalHeader>
           <ModalBody pb={6}>
             <FormControl isInvalid={userHandleInputError}>
               <FormLabel htmlFor="userHandleInput">Your handle</FormLabel>
@@ -178,17 +231,39 @@ export default function Main() {
                 id="userHandleInput"
                 ref={userHandleInputRef}
                 placeholder="handle"
-                value={userHandleInput}
-                onChange={(e) => setUserHandleInput(e.target.value)}
+                value={userSignUpInput.handle}
+                onChange={(e) =>
+                  setUserSignUpInput({
+                    ...userSignUpInput,
+                    handle: e.target.value,
+                  })
+                }
               />
               <FormHelperText>
                 handle can only contain lowercase alphabets, numbers and
                 underscore( _ )
               </FormHelperText>
             </FormControl>
+            <FormControl isInvalid={userNameInputError} className="mt-4">
+              <FormLabel htmlFor="userNameInput">Name</FormLabel>
+              <Input
+                id="userNameInput"
+                placeholder="name"
+                value={userSignUpInput.name}
+                onChange={(e) =>
+                  setUserSignUpInput({
+                    ...userSignUpInput,
+                    name: e.target.value,
+                  })
+                }
+              />
+              <FormHelperText>
+                Enter name you want for others to see.
+              </FormHelperText>
+            </FormControl>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue">Register</Button>
+            <Button disabled={!createUserMutation.isIdle} colorScheme="blue" onClick={handleCreateUser}>Create</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

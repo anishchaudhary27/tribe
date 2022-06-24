@@ -9,7 +9,7 @@ import (
 
 func AuthMiddleware(ctx context.Context, auth *auth.Client) func(*fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
-		token, err := auth.VerifyIDToken(ctx, c.GetReqHeaders()["X-AUTH-TOKEN"])
+		token, err := auth.VerifyIDToken(ctx, c.GetReqHeaders()["X-Auth-Token"])
 		if err != nil {
 			return fiber.ErrForbidden
 		}
