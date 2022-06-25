@@ -42,12 +42,16 @@ func main() {
 	app.Get("/ping", func(c *fiber.Ctx) error {
 		return c.SendString("pong")
 	})
+	app.Get("/avatar/:id", func(c *fiber.Ctx) error {
+		return c.SendFile("./avatar.jpg")
+	})
 	api := app.Group("/api")
 	api.Use(middleware.AuthMiddleware(ctx, auth))
 
 	userGroup := api.Group("/user")
 	userGroup.Get("", user.HandleGetUser(ctx, firestore))
 	userGroup.Post("/create", user.HandleCreateUser(ctx, firestore))
+	userGroup.Post(("/update"), user.HandleUpdateUser(ctx, firestore))
 
 	app.Listen(":8080")
 }

@@ -35,7 +35,7 @@ export default function Login() {
     <div className=" flex justify-center w-full p-4">
       {!isLoadingToken && token && (
         <div className="mt-20 rounded-sm h-60 w-80 py-8 px-8 shadow flex flex-col items-center">
-          <Heading>LogIn</Heading>
+          <Heading  color="#FFAD08">login</Heading>
           <Link className="w-full" to={redirect ? redirect : "/home"}>
             <Button color="#0C8F8F" width={"full"} leftIcon={<FaGoogle />} className="mt-8">
               continue as {token.claims.name?.toString()?.split(" ")[0]}
@@ -46,7 +46,6 @@ export default function Login() {
             leftIcon={<FiLogOut />}
             className="mt-4"
             onClick={() => signOut(auth)}
-            color="#0C8F8F"
           >
             logout
           </Button>
@@ -54,7 +53,7 @@ export default function Login() {
       )}
       {!isLoadingToken && !token && (
         <div className="mt-20 rounded-sm h-60 w-80 py-8 px-8 shadow flex flex-col items-center">
-          <Heading>LogIn</Heading>
+          <Heading>login</Heading>
           <Button
             width={"full"}
             leftIcon={<FaGoogle />}

@@ -1,9 +1,5 @@
 import {
   IconButton,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
   Stack,
   Tooltip,
   useDisclosure,
@@ -22,25 +18,17 @@ import {
 } from "@chakra-ui/react";
 import { Link, Outlet } from "react-router-dom";
 import {
-  AiOutlineMessage,
   FiSearch,
-  FiLogOut,
-  FiGithub,
-  FiHome,
-  MdManageAccounts,
-  CgProfile,
-  MdPayment,
-  FiLogIn,
-  GrRefresh
+  GrNotification,
 } from "react-icons/all";
 import Logo from "../../logo.svg";
-import Avatar from "boring-avatars";
-import { auth } from "../../firebase";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "firebase/auth";
 import { tokenQueryId, getToken } from "../../queries/token";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { readUserQuery, userQueryId, createUserQuery } from "../../queries/user";
+import { AxiosError } from "axios";
+import AppBarMenu from "../../components/appbarMenu";
 
 export default function Main() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -68,22 +56,20 @@ export default function Main() {
   const createUserMutation = useMutation("user",createUserQuery,{
     onSuccess: (newUser) => {
       queryClient.setQueriesData(userQueryId, newUser)
+      onClose()
     },
-    onError: (error) => {
+    onError: (error:AxiosError) => {
       console.error(error)
       toast({
-        title: "error creating user",
+        title: error.message,
         status: "error",
         duration: 5000,
         isClosable: true
       })
-    },
-    onSettled: () => {
-      onClose()
     }
   })
   const handleCreateUser = () => {
-    if(!userHandleInputError && !userHandleInputError && createUserMutation.isIdle) {
+    if(!userHandleInputError && !userHandleInputError && !createUserMutation.isLoading) {
       createUserMutation.mutate({handle: userSignUpInput.handle, name: userSignUpInput.name, token: token?.token})
     }
     else {
@@ -113,15 +99,6 @@ export default function Main() {
           <img src={Logo} className="h-12" />
         </Link>
         <Stack isInline>
-          <Tooltip label="refresh" fontSize={"md"}>
-            <IconButton
-              variant={"ghost"}
-              aria-label="messages"
-              size="lg"
-              isRound
-              icon={<GrRefresh />}
-            />
-          </Tooltip>
           <Tooltip label="search" fontSize={"md"}>
             <Link to="/search">
               <IconButton
@@ -133,87 +110,18 @@ export default function Main() {
               />
             </Link>
           </Tooltip>
-          {!isLoadingToken && token && (
-            <Tooltip label="messages" fontSize={"md"}>
-              <Link to="/messages">
+          {/* {!isLoadingToken && token && (
+            <Tooltip label="notifications" fontSize={"md"}>
                 <IconButton
                   variant={"ghost"}
-                  aria-label="messages"
+                  aria-label="notifications"
                   size="lg"
                   isRound
-                  icon={<AiOutlineMessage />}
+                  icon={<GrNotification />}
                 />
-              </Link>
             </Tooltip>
-          )}
-          <Menu>
-            <MenuButton as={IconButton} rounded="3xl">
-              <Avatar
-                size={40}
-                variant="beam"
-                name={
-                  token && token.claims["name"]
-                    ? `john snow${token.claims.name?.toString()}`
-                    : "Elizabeth Peratrovich"
-                }
-                colors={["#FFAD08", "#EDD75A", "#73B06F", "#0C8F8F", "#405059"]}
-              />
-            </MenuButton>
-            <MenuList>
-              <Link to="/home">
-                <MenuItem>
-                  <FiHome className="mr-2" />
-                  <span>Home</span>
-                </MenuItem>
-              </Link>
-              {!isLoadingToken && token && (
-                <Link to="/profile">
-                  <MenuItem>
-                    <CgProfile className="mr-2" />
-                    <span>My Profile</span>
-                  </MenuItem>
-                </Link>
-              )}
-              {!isLoadingToken && token && (
-                <Link to="/settings">
-                  <MenuItem>
-                    <MdManageAccounts className="mr-2" />
-                    <span>Account Settings</span>
-                  </MenuItem>
-                </Link>
-              )}
-              {!isLoadingToken && token && (
-                <Link to="/subscriptions">
-                  <MenuItem>
-                    <MdPayment className="mr-2" />
-                    <span>My Subscriptions</span>
-                  </MenuItem>
-                </Link>
-              )}
-              {!isLoadingToken && token && (
-                <MenuItem onClick={() => signOut(auth)}>
-                  <FiLogOut className="mr-2" />
-                  <span>LogOut</span>
-                </MenuItem>
-              )}
-              {!isLoadingToken && token && (
-                <Link to="/login">
-                  <MenuItem>
-                    <FiLogIn className="mr-2" />
-                    <span>Login</span>
-                  </MenuItem>
-                </Link>
-              )}
-              <MenuItem
-                onClick={() =>
-                  window.open("https://github.com/anishchaudhary27/tribe")
-                }
-              >
-                <FiGithub className="mr-2" />
-                <span>Source Code</span>
-              </MenuItem>
-            </MenuList>
-          </Menu>
+          )} */}
+          <AppBarMenu token={token} isLoadingToken={isLoadingToken} signOut={signOut}/>
         </Stack>
       </div>
       <Modal
@@ -241,7 +149,8 @@ export default function Main() {
               />
               <FormHelperText>
                 handle can only contain lowercase alphabets, numbers and
-                underscore( _ )
+                underscore( _ ). <br/>
+                You can't change handle once choosen.
               </FormHelperText>
             </FormControl>
             <FormControl isInvalid={userNameInputError} className="mt-4">
@@ -263,7 +172,7 @@ export default function Main() {
             </FormControl>
           </ModalBody>
           <ModalFooter>
-            <Button disabled={!createUserMutation.isIdle} colorScheme="blue" onClick={handleCreateUser}>Create</Button>
+            <Button disabled={createUserMutation.isLoading} colorScheme="blue" onClick={handleCreateUser}>Create</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

@@ -6,6 +6,7 @@ import { auth } from "./firebase";
 import Main from "./pages/app";
 import Home from "./pages/app/home";
 import Login from "./pages/app/login";
+import Profile from "./pages/app/profile";
 import Landing from "./pages/landing";
 import { tokenQueryId } from "./queries/token";
 import { userQueryId } from "./queries/user";
@@ -25,6 +26,7 @@ export default function App() {
       <Route path="*" element={<Main />}>
         <Route path="home" element={<Home />} />
         <Route path="login" element={<Login />} />
+        <Route path="profile" element={<Profile />} />
       </Route>
     </Routes>
   );

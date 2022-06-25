@@ -56,6 +56,59 @@ function createUserQuery (props:CreateUserProps) {
         },
       }
     )
+    .then(resp => {
+      return {
+        status: resp.status,
+        body: resp.data
+      }
+    })
 };
 
-export { userQueryId, readUserQuery, createUserQuery };
+interface UpdateUserProps {
+  name: string;
+  token: string|undefined;
+  twitter: string;
+  youtube: string;
+  instagram: string;
+  facebook: string;
+  about: string;
+  animateAvatar: boolean;
+}
+
+function updateUserQuery(props:UpdateUserProps) {
+  return api
+    .post(
+      "/api/user/update",
+      {
+        name: props.name,
+        about: props.about,
+        facebook: props.facebook,
+        twitter: props.twitter,
+        instagram: props.instagram,
+        youtube: props.youtube,
+        animateAvatar: props.animateAvatar
+      },
+      {
+        headers: {
+          "X-AUTH-TOKEN": props.token!,
+        },
+      }
+    )
+    .then(resp => {
+      return {
+        status: resp.status,
+        body: resp.data
+      }
+    })
+}
+
+interface UploadAvatar {
+  token: string| undefined;
+  
+}
+
+function UploadAvatar(props:UploadAvatar) {
+
+}
+
+export { userQueryId, readUserQuery, createUserQuery, updateUserQuery };
