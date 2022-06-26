@@ -57,6 +57,7 @@ function dataURItoBlob(dataURI:string) {
 
 export default function AvatarPicker(props: Props) {
   const editor = useRef<any>(null);
+  const [uploading, setUploading] = useState(false)
   const toast = useToast()
   const {
     isLoading: isLoadingToken,
@@ -90,6 +91,7 @@ export default function AvatarPicker(props: Props) {
         const dataURL = canvas.toDataURL('image/png')
         const blob = dataURItoBlob(dataURL)
         const location = ref(storage, `avatars/${user?.body.UID}`)
+        setUploading(true)
         uploadBytes(location, blob).then(res => {
           toast({
             title: "avatar uploaded",
@@ -105,6 +107,9 @@ export default function AvatarPicker(props: Props) {
             duration: 2000,
             status: "error"
           })
+        })
+        .finally(() => {
+          setUploading(false)
         })
     }
   };
@@ -144,7 +149,7 @@ export default function AvatarPicker(props: Props) {
           </FormControl>
         </ModalBody>
         <ModalFooter>
-          <Button variant="solid" colorScheme={"blue"} onClick={handleUpdate}>
+          <Button disabled={uploading} variant="solid" colorScheme={"blue"} onClick={handleUpdate}>
             update
           </Button>
         </ModalFooter>
