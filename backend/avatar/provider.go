@@ -22,7 +22,7 @@ func HandleGetAvatar(ctx context.Context, storage *storage.Client) func(*fiber.C
 		rc, err := bucket.Object("avatars/" + c.Params("id")).NewReader(ctx)
 		if err != nil {
 			log.Printf("Object(%q).NewReader: %v", "avatars/"+c.Params("id"), err)
-			return fiber.ErrNotFound
+			return c.SendFile("avatar.jpg")
 		}
 		defer rc.Close()
 		data, err := ioutil.ReadAll(rc)

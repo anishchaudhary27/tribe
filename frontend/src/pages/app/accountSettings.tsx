@@ -3,6 +3,7 @@ import {
   Button,
   Divider,
   FormControl,
+  FormHelperText,
   FormLabel,
   Heading,
   IconButton,
@@ -33,7 +34,7 @@ export default function AccountSettings() {
   const toast = useToast();
   const queryClient = useQueryClient();
   const [changes, setChanges] = useState(false);
-  const avatarPickerProps = useDisclosure()
+  const avatarPickerProps = useDisclosure();
   const [currUser, setCurrUser] = useState({
     name: "",
     about: "",
@@ -102,14 +103,23 @@ export default function AccountSettings() {
     }
   };
   useEffect(() => {
-    if(user && currUser.animateAvatar === false && user.body.AnimateAvatar === true) {
-        avatarPickerProps.onOpen()
+    if (
+      user &&
+      currUser.animateAvatar === false &&
+      user.body.AnimateAvatar === true
+    ) {
+      avatarPickerProps.onOpen();
     }
     if (user?.body) {
-      if (currUser.name !== user.body.Name || currUser.about !== user.body.About
-        || currUser.twitter !== user.body.Twitter || currUser.instagram !== user.body.Instagram
-        || currUser.facebook !== user.body.Facebook || currUser.youtube !== user.body.Youtube
-        || currUser.animateAvatar !== user.body.AnimateAvatar) {
+      if (
+        currUser.name !== user.body.Name ||
+        currUser.about !== user.body.About ||
+        currUser.twitter !== user.body.Twitter ||
+        currUser.instagram !== user.body.Instagram ||
+        currUser.facebook !== user.body.Facebook ||
+        currUser.youtube !== user.body.Youtube ||
+        currUser.animateAvatar !== user.body.AnimateAvatar
+      ) {
         setChanges(true);
         return;
       }
@@ -117,10 +127,13 @@ export default function AccountSettings() {
     setChanges(false);
   }, [currUser]);
   useEffect(() => {
-    document.title = "account settings"
-  }, [])
+    document.title = "account settings";
+  }, []);
   const handleUpdateUserProfile = () => {
     updateUserMutation.mutate({ ...currUser, token: token?.token });
+  };
+  const handleUpdateAvatar = () => {
+    avatarPickerProps.onOpen();
   };
   return (
     <div className="flex justify-center py-8">
@@ -151,14 +164,18 @@ export default function AccountSettings() {
           <FormLabel>avatar</FormLabel>
           <div className="flex items-end">
             <UserAvatar size={100} />
-            <Tooltip label="edit avatar">
-              <IconButton
-                rounded={"3xl"}
-                aria-label="edit avatar"
-                icon={<EditIcon />}
-              />
-            </Tooltip>
+            {user && user.body.AnimateAvatar === false && (
+              <Tooltip label="edit avatar">
+                <IconButton
+                  rounded={"3xl"}
+                  aria-label="edit avatar"
+                  icon={<EditIcon />}
+                  onClick={handleUpdateAvatar}
+                />
+              </Tooltip>
+            )}
           </div>
+          <FormHelperText>avatar may take upto 10 mins to update</FormHelperText>
         </FormControl>
 
         <FormControl display="flex" alignItems="center" className="mt-2">
@@ -172,6 +189,7 @@ export default function AccountSettings() {
               })
             }
           />
+          <FormHelperText className=" ml-4 ">click update for changes to reflect</FormHelperText>
         </FormControl>
 
         <FormControl className="mt-2">
@@ -275,8 +293,13 @@ export default function AccountSettings() {
           Delete Account
         </Button>
       </div>
-      <AvatarPicker onClose={avatarPickerProps.onClose} isOpen={avatarPickerProps.isOpen} 
-      resetUseAnimateAVatar={() => setCurrUser({...currUser, animateAvatar: true})} />
+      <AvatarPicker
+        onClose={avatarPickerProps.onClose}
+        isOpen={avatarPickerProps.isOpen}
+        resetUseAnimateAVatar={() =>
+          setCurrUser({ ...currUser, animateAvatar: true })
+        }
+      />
     </div>
   );
 }
