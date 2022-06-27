@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { auth } from "../firebase";
 import { Auth, IdTokenResult } from "firebase/auth";
 import UserAvatar from "./avatar";
+import { SettingsIcon } from "@chakra-ui/icons";
 
 interface Props {
   token: IdTokenResult | undefined | null;
@@ -55,6 +56,14 @@ export default function AppBarMenu(props: Props) {
             <MenuItem>
               <MdManageAccounts className="mr-2" />
               <span>manage subscribors</span>
+            </MenuItem>
+          </Link>
+        )}
+        {!isLoadingToken && token && (
+          <Link to="/settings">
+            <MenuItem>
+              <SettingsIcon className="mr-2" />
+              <span>account settings</span>
             </MenuItem>
           </Link>
         )}

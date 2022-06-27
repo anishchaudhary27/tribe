@@ -19,7 +19,6 @@ import {
 import { Link, Outlet } from "react-router-dom";
 import {
   FiSearch,
-  GrNotification,
 } from "react-icons/all";
 import Logo from "../../logo.svg";
 import { useEffect, useRef, useState } from "react";
@@ -110,17 +109,6 @@ export default function Main() {
               />
             </Link>
           </Tooltip>
-          {/* {!isLoadingToken && token && (
-            <Tooltip label="notifications" fontSize={"md"}>
-                <IconButton
-                  variant={"ghost"}
-                  aria-label="notifications"
-                  size="lg"
-                  isRound
-                  icon={<GrNotification />}
-                />
-            </Tooltip>
-          )} */}
           <AppBarMenu token={token} isLoadingToken={isLoadingToken} signOut={signOut}/>
         </Stack>
       </div>

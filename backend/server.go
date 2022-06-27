@@ -30,6 +30,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("error initializing firestore: %v\n", err)
 	}
+	// _, err := firebaseApp.Storage(ctx)
+	// if err != nil {
+	// 	log.Fatalf("error initializing firestore: %v\n", err)
+	// }
 	appConfig, err := config.GetAppConfig()
 	if err != nil {
 		panic(err)
@@ -42,9 +46,7 @@ func main() {
 	app.Get("/ping", func(c *fiber.Ctx) error {
 		return c.SendString("pong")
 	})
-	app.Get("/avatar/:id", func(c *fiber.Ctx) error {
-		return c.SendFile("./avatar.jpg")
-	})
+	// app.Get("/avatar/:id", avatar.HandleGetAvatar(ctx, storage))
 	api := app.Group("/api")
 	api.Use(middleware.AuthMiddleware(ctx, auth))
 
