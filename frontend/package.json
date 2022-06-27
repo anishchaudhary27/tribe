@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "deploy": "yarn build --mode production && firebase deploy --only hosting"
+    "deploy": "yarn build && firebase deploy --only hosting"
   },
   "dependencies": {
     "@algolia/autocomplete-js": "^1.7.0",
