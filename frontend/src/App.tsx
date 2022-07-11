@@ -28,7 +28,7 @@ export default function App() {
       <Route path="*" element={<Main />}>
         <Route path="home" element={<Home />} />
         <Route path="login" element={<Login />} />
-        <Route path="profile" element={<Profile />} />
+        <Route path="profile/:id" element={<Profile />} />
         <Route path="settings" element={<AccountSettings />} />
         <Route path="search" element={<Search />} />
       </Route>

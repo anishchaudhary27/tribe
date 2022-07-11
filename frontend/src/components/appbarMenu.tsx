@@ -36,30 +36,6 @@ export default function AppBarMenu(props: Props) {
           </MenuItem>
         </Link>
         {!isLoadingToken && token && (
-          <Link to="/profile">
-            <MenuItem>
-              <CgProfile className="mr-2" />
-              <span>my profile</span>
-            </MenuItem>
-          </Link>
-        )}
-        {!isLoadingToken && token && (
-          <Link to="/subscriptions">
-            <MenuItem>
-              <MdPayment className="mr-2" />
-              <span>my subscriptions</span>
-            </MenuItem>
-          </Link>
-        )}
-        {!isLoadingToken && token && (
-          <Link to="/settings">
-            <MenuItem>
-              <MdManageAccounts className="mr-2" />
-              <span>manage subscribors</span>
-            </MenuItem>
-          </Link>
-        )}
-        {!isLoadingToken && token && (
           <Link to="/settings">
             <MenuItem>
               <SettingsIcon className="mr-2" />

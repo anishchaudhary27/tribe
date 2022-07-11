@@ -1,6 +1,6 @@
-package user
+package profile
 
-type User struct {
+type Profile struct {
 	UID           string `firestore:"uid"`
 	Name          string `firestore:"name"`
 	Handle        string `firestore:"handle"`

@@ -149,7 +149,7 @@ export default function AvatarPicker(props: Props) {
           </FormControl>
         </ModalBody>
         <ModalFooter>
-          <Button disabled={uploading} variant="solid" colorScheme={"blue"} onClick={handleUpdate}>
+          <Button isLoading={uploading} variant="solid" colorScheme={"blue"} onClick={handleUpdate}>
             update
           </Button>
         </ModalFooter>

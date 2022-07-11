@@ -152,7 +152,7 @@ export default function AccountSettings() {
                   onClick={handleDiscardChanges}
                 />
               </Tooltip>
-              <Button colorScheme={"blue"} onClick={handleUpdateUserProfile}>
+              <Button isLoading={updateUserMutation.isLoading} colorScheme={"blue"} onClick={handleUpdateUserProfile}>
                 update
               </Button>
             </Stack>
